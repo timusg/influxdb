@@ -194,6 +194,54 @@ func (self *DatastoreSuite) TestCanWriteAndRetrievePoints(c *C) {
 	c.Assert(resultSeries, Not(DeepEquals), series)
 }
 
+func (self *DatastoreSuite) TestCanRetrieveDataWithAlias(c *C) {
+	cleanup(nil)
+	db := newDatastore(c)
+	defer cleanup(db)
+	mock := `
+  {
+    "points": [
+      {
+        "values": [
+          {
+            "int64_value": 3
+          }
+        ],
+        "sequence_number": 1
+      },
+      {
+        "values": [
+          {
+            "int64_value": 2
+          }
+        ],
+        "sequence_number": 2
+      }
+    ],
+    "name": "foo",
+    "fields": ["value"]
+  }`
+	pointTime := time.Now().Unix()
+	series := stringToSeries(mock, pointTime, c)
+	err := db.WriteSeriesData("test", series)
+	c.Assert(err, IsNil)
+	q, errQ := parser.ParseQuery("select value from foo as bar;")
+	c.Assert(errQ, IsNil)
+	resultSeries := []*protocol.Series{}
+	yield := func(series *protocol.Series) error {
+		resultSeries = append(resultSeries, series)
+		return nil
+	}
+	user := &MockUser{}
+	err = db.ExecuteQuery(user, "test", q, yield)
+	c.Assert(err, IsNil)
+	// we should get the actual data and the end of series data
+	// indicator , i.e. a series with no points
+	c.Assert(resultSeries, HasLen, 2)
+	c.Assert(*resultSeries[0].Name, Equals, "bar")
+	c.Assert(*resultSeries[1].Name, Equals, "bar")
+}
+
 func (self *DatastoreSuite) TestCanPersistDataAndWriteNewData(c *C) {
 	cleanup(nil)
 	db := newDatastore(c)
