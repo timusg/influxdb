@@ -63,6 +63,17 @@ func (self *QueryParserSuite) TestSimpleFromClause(c *C) {
 	c.Assert(fromClause.Names[0].Name.Name, Equals, "t")
 }
 
+func (self *QueryParserSuite) TestFromClauseWithAliasing(c *C) {
+	q, err := ParseQuery("select value from users.events as events;")
+	c.Assert(err, IsNil)
+
+	fromClause := q.GetFromClause()
+	c.Assert(fromClause.Type, Equals, FromClauseArray)
+	c.Assert(fromClause.Names, HasLen, 1)
+	c.Assert(fromClause.Names[0].Name.Name, Equals, "users.events")
+	c.Assert(fromClause.Names[0].Alias, Equals, "events")
+}
+
 func (self *QueryParserSuite) TestParseFromWithMergedTable(c *C) {
 	q, err := ParseQuery("select count(*) from newsletter.signups merge user.signups where time>now()-1d;")
 	c.Assert(err, IsNil)
