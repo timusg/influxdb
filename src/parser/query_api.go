@@ -29,6 +29,24 @@ func uniq(slice []string) []string {
 	return slice
 }
 
+func (self *Query) GetTableAliases(name string) []string {
+	names := self.GetFromClause().Names
+	if len(names) == 1 && names[0].Name.Type == ValueRegex {
+		return []string{name}
+	}
+
+	aliases := []string{}
+
+	for _, fromName := range names {
+		if fromName.Name.Name != name {
+			continue
+		}
+
+		aliases = append(aliases, fromName.Alias)
+	}
+	return aliases
+}
+
 // Returns a mapping from the time series names (or regex) to the
 // column names that are references
 func (self *Query) GetReferencedColumns() map[*Value][]string {

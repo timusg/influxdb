@@ -168,3 +168,18 @@ func (self *QueryApiSuite) TestErrorInStartTime(c *C) {
 		c.Assert(err, ErrorMatches, error)
 	}
 }
+
+func (self *QueryApiSuite) TestAliasing(c *C) {
+	query, err := ParseQuery("select * from user.events as events")
+	c.Assert(err, IsNil)
+	c.Assert(query.GetTableAliases("user.events"), DeepEquals, []string{"events"})
+
+	query, err = ParseQuery("select * from user.events as events inner join user.events as clicks")
+	c.Assert(err, IsNil)
+	c.Assert(query.GetTableAliases("user.events"), DeepEquals, []string{"events", "clicks"})
+
+	// aliasing is ignored in case of a regex
+	query, err = ParseQuery("select * from /.*events.*/i")
+	c.Assert(err, IsNil)
+	c.Assert(query.GetTableAliases("user.events"), DeepEquals, []string{"user.events"})
+}
