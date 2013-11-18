@@ -116,6 +116,7 @@
 ## Features
 
 - [Issue #51](https://github.com/influxdb/influxdb/issues/51). Implement first and last aggregates
+- [Issue #36](https://github.com/influxdb/influxdb/issues/36). Support table aliases
 
 ## Bugfixes
 
