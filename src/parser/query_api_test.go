@@ -174,6 +174,10 @@ func (self *QueryApiSuite) TestAliasing(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(query.GetTableAliases("user.events"), DeepEquals, []string{"events"})
 
+	query, err = ParseQuery("select * from user.events")
+	c.Assert(err, IsNil)
+	c.Assert(query.GetTableAliases("user.events"), DeepEquals, []string{"user.events"})
+
 	query, err = ParseQuery("select * from user.events as events inner join user.events as clicks")
 	c.Assert(err, IsNil)
 	c.Assert(query.GetTableAliases("user.events"), DeepEquals, []string{"events", "clicks"})

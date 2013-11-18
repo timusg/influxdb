@@ -42,6 +42,11 @@ func (self *Query) GetTableAliases(name string) []string {
 			continue
 		}
 
+		if fromName.Alias == "" {
+			aliases = append(aliases, name)
+			continue
+		}
+
 		aliases = append(aliases, fromName.Alias)
 	}
 	return aliases
